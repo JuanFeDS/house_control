@@ -1,16 +1,13 @@
-// ─────────────────────────────────────────────────────────────
-// CONFIG — reemplaza con los valores de tu proyecto Supabase
-// Settings > API > Project URL y anon/public key
-// ─────────────────────────────────────────────────────────────
-const SUPABASE_URL      = 'https://TUPROYECTO.supabase.co';
-const SUPABASE_ANON_KEY = 'TU_ANON_KEY';
-const { createClient }  = window.supabase;
-const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+import { createClient } from '@supabase/supabase-js';
 
-// ─────────────────────────────────────────────────────────────
-// DATOS — idéntico a data/datos.json
-// ─────────────────────────────────────────────────────────────
-const DATA = {
+// ─── Supabase ─────────────────────────────────────────────────
+const sb = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+);
+
+// ─── Datos ────────────────────────────────────────────────────
+export const DATA = {
   admin: { nombre: 'Admin' },
   ingresos: [
     { fuente: 'María',    valor: 860000,  dia_pago: 2,  distribuye_beneficiarios: true  },
@@ -37,17 +34,12 @@ const DATA = {
     { concepto: 'Gatos',    valor_mensual: 75000,  frecuencia: 'cada_3_dias', valor_por_pago: 7500,  primer_dia: 3 }
   ],
   beneficiarios: [
-    { nombre: 'Persona 1', tipo: 'completa' },
-    { nombre: 'Persona 2', tipo: 'completa' },
-    { nombre: 'Persona 3', tipo: 'completa' },
-    { nombre: 'Persona 4', tipo: 'completa' },
-    { nombre: 'Persona 5', tipo: 'media'    },
-    { nombre: 'Persona 6', tipo: 'media'    }
+    { nombre: 'Completa', tipo: 'completa' },
+    { nombre: 'Media',    tipo: 'media'    }
   ]
 };
 
-// Lista completa de personas para el login
-const PERSONAS = [
+export const PERSONAS = [
   { nombre: DATA.admin.nombre, rol: 'admin', tipo_participacion: null },
   ...DATA.beneficiarios.map(b => ({
     nombre: b.nombre,
@@ -56,30 +48,29 @@ const PERSONAS = [
   }))
 ];
 
-// ─────────────────────────────────────────────────────────────
-// CÓMPUTOS DERIVADOS
-// ─────────────────────────────────────────────────────────────
-const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
+// ─── Cómputos derivados ───────────────────────────────────────
+export const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
 
-const totalBrutoIngresos = DATA.ingresos.reduce((s, i) => s + i.valor, 0);
-const totalSvc           = DATA.gastos_servicios.reduce((s, g) => s + g.valor, 0);
-const totalOtros         = DATA.gastos_otros.reduce((s, g) => s + (g.valor_mensual || 0), 0);
-const totalGastos        = totalSvc + totalOtros;
-const totalIngresosDist  = DATA.ingresos
-                             .filter(i => i.distribuye_beneficiarios !== false)
-                             .reduce((s, i) => s + i.valor, 0);
-const disponible         = totalIngresosDist - totalGastos;
+export const totalBrutoIngresos = DATA.ingresos.reduce((s, i) => s + i.valor, 0);
+export const totalSvc           = DATA.gastos_servicios.reduce((s, g) => s + g.valor, 0);
+export const totalOtros         = DATA.gastos_otros.reduce((s, g) => s + (g.valor_mensual || 0), 0);
+export const totalGastos        = totalSvc + totalOtros;
+const totalIngresosDist         = DATA.ingresos
+                                    .filter(i => i.distribuye_beneficiarios !== false)
+                                    .reduce((s, i) => s + i.valor, 0);
+export const disponible         = totalIngresosDist - totalGastos;
 
-const completaCount = DATA.beneficiarios.filter(b => b.tipo === 'completa').length;
-const mediaCount    = DATA.beneficiarios.filter(b => b.tipo === 'media').length;
-const unidades      = completaCount + mediaCount * 0.5;
-const valorCompleta = Math.round(disponible / unidades);
-const valorMedia    = Math.round(valorCompleta / 2);
+export const completaCount = DATA.beneficiarios.filter(b => b.tipo === 'completa').length;
+export const mediaCount    = DATA.beneficiarios.filter(b => b.tipo === 'media').length;
+const unidades             = completaCount + mediaCount * 0.5;
+export const valorCompleta = Math.round(disponible / unidades);
+export const valorMedia    = Math.round(valorCompleta / 2);
 
 const mascotas        = DATA.gastos_otros.filter(g => g.frecuencia === 'cada_3_dias');
 const mascotasPorPago = mascotas.reduce((s, m) => s + m.valor_por_pago, 0);
+const gastosFijos     = DATA.gastos_otros.filter(g => !g.frecuencia);
 
-const distribPorIngreso = (() => {
+export const distribPorIngreso = (() => {
   let acum = 0;
   return DATA.ingresos
     .filter(i => i.distribuye_beneficiarios)
@@ -99,7 +90,52 @@ const distribPorIngreso = (() => {
     });
 })();
 
-const calEvents = (() => {
+// ─── Ventanas de tiempo ───────────────────────────────────────
+export const ventanas = (() => {
+  const sorted = [...DATA.ingresos].sort((a, b) => a.dia_pago - b.dia_pago);
+
+  return sorted.map((ingreso, idx) => {
+    const diaInicio = ingreso.dia_pago;
+    const diaFin    = idx < sorted.length - 1 ? sorted[idx + 1].dia_pago - 1 : 31;
+    const distribuye = ingreso.distribuye_beneficiarios !== false;
+
+    const mascotasEnVentana = [];
+    mascotas.forEach(m => {
+      for (let d = m.primer_dia; d <= 31; d += 3) {
+        if (d >= diaInicio && d <= diaFin) {
+          mascotasEnVentana.push({ concepto: m.concepto, dia: d, valor: m.valor_por_pago });
+        }
+      }
+    });
+
+    const serviciosEnVentana = DATA.gastos_servicios.filter(
+      g => g.dia_pago >= diaInicio && g.dia_pago <= diaFin
+    );
+
+    const dist = distribuye
+      ? distribPorIngreso.find(d => d.fuente === ingreso.fuente)
+      : null;
+
+    return {
+      fuente:            ingreso.fuente,
+      valor:             ingreso.valor,
+      dia_pago:          ingreso.dia_pago,
+      diaInicio,
+      diaFin,
+      distribuye,
+      esPrincipal:       !!ingreso.cubre_gastos_primero,
+      nota:              ingreso.nota ?? null,
+      mascotasEnVentana,
+      serviciosEnVentana,
+      gastosFijos:       ingreso.cubre_gastos_primero ? gastosFijos : [],
+      aporteAlFondo:     dist?.monto ?? 0,
+      porCompleta:       dist?.porCompleta ?? 0,
+      porMedia:          dist?.porMedia ?? 0,
+    };
+  });
+})();
+
+export const calEvents = (() => {
   const ev  = {};
   const add = (day, obj) => { (ev[day] = ev[day] || []).push(obj); };
   DATA.ingresos.forEach(i => add(i.dia_pago, { tipo: 'ingreso', label: `↑ ${i.fuente}` }));
@@ -117,34 +153,23 @@ const calEvents = (() => {
   return ev;
 })();
 
-// ─────────────────────────────────────────────────────────────
-// IDENTITY — persiste en localStorage entre sesiones
-// Primera visita: el usuario elige su nombre una sola vez.
-// Siguientes visitas: se lee de localStorage, login automático.
-// Se borra solo si el usuario pulsa "Cambiar" o limpia el browser.
-// ─────────────────────────────────────────────────────────────
+// ─── Identity ─────────────────────────────────────────────────
 const STORAGE_KEY = 'hogar_identity';
 
-const identity = {
+export const identity = {
   get() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? JSON.parse(raw) : null;
     } catch { return null; }
   },
-
   set(persona) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(persona));
   },
-
   clear() {
     localStorage.removeItem(STORAGE_KEY);
     window.location.href = 'index.html';
   },
-
-  // Llama al cargar cada página protegida.
-  // Si ya hay identidad guardada, devuelve el usuario sin pasar por el login.
-  // Si no hay identidad, redirige al login.
   require(requiredRol = null) {
     const user = this.get();
     if (!user) { window.location.href = 'index.html'; return null; }
@@ -155,47 +180,41 @@ const identity = {
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-// PAGOS
-// ─────────────────────────────────────────────────────────────
-const pagosDB = {
+// ─── Ingresos registrados ─────────────────────────────────────
+export const ingresosDB = {
   async getMes(mes, anio) {
-    const { data } = await sb.from('pagos').select('*')
+    const { data } = await sb.from('ingresos_registrados').select('*')
       .eq('mes', mes).eq('anio', anio).order('fecha');
     return data || [];
   },
-
-  async crear(pago) {
+  async crear(ingreso) {
     const user = identity.get();
-    const { error } = await sb.from('pagos').insert({
-      ...pago,
+    const { error } = await sb.from('ingresos_registrados').insert({
+      ...ingreso,
       registrado_por: user?.nombre ?? 'Admin'
     });
     return error;
   },
-
   async eliminar(id) {
-    const { error } = await sb.from('pagos').delete().eq('id', id);
+    const { error } = await sb.from('ingresos_registrados').delete().eq('id', id);
     return error;
   }
 };
 
-// ─────────────────────────────────────────────────────────────
-// UTILIDADES
-// ─────────────────────────────────────────────────────────────
-const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
-               'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+// ─── Utilidades ───────────────────────────────────────────────
+export const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio',
+                      'Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
-function mesAnioLabel(mes, anio) {
+export function mesAnioLabel(mes, anio) {
   return `${MESES[mes - 1]} ${anio}`;
 }
 
-function buildCalendarHTML(todayDay = null) {
+export function buildCalendarHTML(todayDay = null) {
   let gridHtml = '', agendaHtml = '';
   for (let d = 1; d <= 31; d++) {
-    const evs     = calEvents[d] || [];
-    const active  = evs.length > 0;
-    const isToday = d === todayDay;
+    const evs       = calEvents[d] || [];
+    const active    = evs.length > 0;
+    const isToday   = d === todayDay;
     const chipsHTML = evs.map(e => {
       let out = `<span class="chip ${e.tipo}">${e.label}</span>`;
       if (e.sub) out += `<span class="chip-sub">${e.sub}</span>`;

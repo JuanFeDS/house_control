@@ -157,7 +157,7 @@
   <div class="tabs-outer">
     <div class="tabs-wrap">
       <button class="tab-btn active" onclick="switchTab('calendario', this)">📅 Calendario</button>
-      <button class="tab-btn" onclick="switchTab('registrar', this)">💳 Registrar Pago</button>
+      <button class="tab-btn" onclick="switchTab('registrar', this)">💳 Registrar Ingreso</button>
       <button class="tab-btn" onclick="switchTab('historial', this)">📋 Historial</button>
     </div>
   </div>
@@ -178,56 +178,50 @@
       </div>
     </div>
 
-    <!-- TAB: REGISTRAR PAGO -->
+    <!-- TAB: REGISTRAR INGRESO -->
     <div id="tab-registrar" class="tab-view">
-      <div class="section">
-        <div class="section-title">Registrar pago a beneficiarios</div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label">Fuente de ingreso</label>
-            <select id="reg-fuente" class="form-select" onchange="actualizarMontos()"></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Fecha de pago</label>
-            <input type="date" id="reg-fecha" class="form-input" />
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mes</label>
-            <select id="reg-mes" class="form-select"></select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Año</label>
-            <select id="reg-anio" class="form-select"></select>
-          </div>
-          <div class="form-group full">
-            <label class="form-label">Montos (calculados automáticamente)</label>
-            <div class="montos-preview">
-              <div class="mp-item">
-                <div class="mp-label">Total distribuido</div>
-                <div class="mp-val" id="mp-total">—</div>
+      <div class="reg-layout">
+
+        <!-- Columna izquierda: formulario -->
+        <div>
+          <div class="section">
+            <div class="section-title">Registrar ingreso</div>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label">Fuente</label>
+                <select id="reg-fuente" class="form-select" onchange="actualizarDesglose()"></select>
               </div>
-              <div class="mp-item">
-                <div class="mp-label">Completa (×<span id="mp-nc">4</span>)</div>
-                <div class="mp-val" id="mp-completa">—</div>
+              <div class="form-group">
+                <label class="form-label">Fecha recibido</label>
+                <input type="date" id="reg-fecha" class="form-input" />
               </div>
-              <div class="mp-item">
-                <div class="mp-label">Media (×<span id="mp-nm">2</span>)</div>
-                <div class="mp-val" id="mp-media">—</div>
+              <div class="form-group">
+                <label class="form-label">Mes</label>
+                <select id="reg-mes" class="form-select"></select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Año</label>
+                <select id="reg-anio" class="form-select"></select>
+              </div>
+              <div class="form-group full">
+                <label class="form-label">Notas (opcional)</label>
+                <textarea id="reg-notas" class="form-textarea" placeholder="Ej: Transferencia #12345"></textarea>
               </div>
             </div>
+            <div style="margin-top:1.25rem">
+              <button class="btn-primary" id="btn-registrar" onclick="registrarIngreso()">Confirmar ingreso</button>
+            </div>
           </div>
-          <div class="form-group full">
-            <label class="form-label">Notas (opcional)</label>
-            <textarea id="reg-notas" class="form-textarea" placeholder="Ej: Transferencia realizada, referencia #12345"></textarea>
+
+          <div class="section">
+            <div class="section-title">Ingresos del mes actual</div>
+            <div id="ingresos-mes-actual"></div>
           </div>
         </div>
-        <div style="margin-top:1.25rem">
-          <button class="btn-primary" id="btn-registrar" onclick="registrarPago()">Confirmar pago</button>
-        </div>
-      </div>
-      <div class="section">
-        <div class="section-title">Pagos del mes actual</div>
-        <div id="pagos-mes-actual"></div>
+
+        <!-- Columna derecha: desglose de la ventana -->
+        <div id="desglose-wrap"></div>
+
       </div>
     </div>
 
@@ -250,172 +244,6 @@
 
   <div id="toast" class="toast"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="assets/js/app.js"></script>
-  <script>
-    let todayDay;
-
-    async function init() {
-      const user = identity.require('admin');
-      if (!user) return;
-
-      document.getElementById('admin-nombre').textContent = user.nombre;
-      document.getElementById('kpi-ing').textContent = fmt(totalBrutoIngresos);
-      document.getElementById('kpi-gas').textContent = fmt(totalGastos);
-      document.getElementById('kpi-lib').textContent = fmt(disponible);
-      document.getElementById('mp-nc').textContent = completaCount;
-      document.getElementById('mp-nm').textContent = mediaCount;
-
-      // Calendario
-      const now = new Date();
-      todayDay = now.getDate();
-      const { gridHtml, agendaHtml } = buildCalendarHTML(todayDay);
-      document.getElementById('cal-grid').innerHTML   = gridHtml;
-      document.getElementById('cal-agenda').innerHTML = agendaHtml;
-
-      // Fuentes en el formulario
-      const sel = document.getElementById('reg-fuente');
-      distribPorIngreso.forEach(d => {
-        const opt = document.createElement('option');
-        opt.value = d.fuente;
-        opt.textContent = `${d.fuente} — Día ${d.dia}`;
-        sel.appendChild(opt);
-      });
-      actualizarMontos();
-
-      // Fecha default: hoy
-      document.getElementById('reg-fecha').value = now.toISOString().split('T')[0];
-
-      // Selectores mes/año
-      const mesSelIds  = ['reg-mes', 'hist-mes'];
-      const anioSelIds = ['reg-anio', 'hist-anio'];
-      MESES.forEach((m, i) => {
-        mesSelIds.forEach(id => {
-          const o = document.createElement('option');
-          o.value = i + 1; o.textContent = m;
-          if (i + 1 === now.getMonth() + 1) o.selected = true;
-          document.getElementById(id).appendChild(o.cloneNode(true));
-        });
-      });
-      const anios = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
-      anios.forEach(a => {
-        anioSelIds.forEach(id => {
-          const o = document.createElement('option');
-          o.value = a; o.textContent = a;
-          if (a === now.getFullYear()) o.selected = true;
-          document.getElementById(id).appendChild(o.cloneNode(true));
-        });
-      });
-
-      cargarPagosMesActual();
-    }
-
-    function actualizarMontos() {
-      const fuente = document.getElementById('reg-fuente').value;
-      const d = distribPorIngreso.find(x => x.fuente === fuente);
-      if (!d) return;
-      document.getElementById('mp-total').textContent    = fmt(d.monto);
-      document.getElementById('mp-completa').textContent = fmt(d.porCompleta);
-      document.getElementById('mp-media').textContent    = fmt(d.porMedia);
-    }
-
-    async function cargarPagosMesActual() {
-      const now = new Date();
-      const lista = await pagosDB.getMes(now.getMonth() + 1, now.getFullYear());
-      renderTablaPagos('pagos-mes-actual', lista, true);
-    }
-
-    async function cargarHistorial() {
-      const mes  = parseInt(document.getElementById('hist-mes').value);
-      const anio = parseInt(document.getElementById('hist-anio').value);
-      const lista = await pagosDB.getMes(mes, anio);
-      renderTablaPagos('historial-tabla', lista, true);
-    }
-
-    function renderTablaPagos(containerId, lista, conEliminar) {
-      const el = document.getElementById(containerId);
-      if (!lista.length) {
-        el.innerHTML = '<div class="empty-state">No hay pagos registrados para este período.</div>';
-        return;
-      }
-      const rows = lista.map(p => `
-        <tr>
-          <td>${p.fecha}</td>
-          <td><span class="badge-fuente">${p.fuente}</span></td>
-          <td>${fmt(p.monto_total)}</td>
-          <td>${fmt(p.monto_completa)}</td>
-          <td>${fmt(p.monto_media)}</td>
-          <td>${p.notas || '—'}</td>
-          ${conEliminar ? `<td><button class="btn-del" onclick="eliminarPago('${p.id}', '${containerId}')">✕</button></td>` : ''}
-        </tr>`).join('');
-      el.innerHTML = `
-        <table>
-          <thead>
-            <tr>
-              <th>Fecha</th><th>Fuente</th><th>Total</th>
-              <th>Completa</th><th>Media</th><th>Notas</th>
-              ${conEliminar ? '<th></th>' : ''}
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>`;
-    }
-
-    async function registrarPago() {
-      const btn    = document.getElementById('btn-registrar');
-      const fuente = document.getElementById('reg-fuente').value;
-      const d      = distribPorIngreso.find(x => x.fuente === fuente);
-      const mes    = parseInt(document.getElementById('reg-mes').value);
-      const anio   = parseInt(document.getElementById('reg-anio').value);
-      const fecha  = document.getElementById('reg-fecha').value;
-      const notas  = document.getElementById('reg-notas').value.trim();
-
-      if (!fecha) { showToast('Selecciona una fecha.', 'error'); return; }
-
-      btn.disabled = true;
-      const error = await pagosDB.crear({
-        fecha, fuente,
-        monto_total:    d.monto,
-        monto_completa: d.porCompleta,
-        monto_media:    d.porMedia,
-        mes, anio, notas: notas || null
-      });
-
-      btn.disabled = false;
-      if (error) {
-        showToast('Error al registrar el pago.', 'error');
-      } else {
-        showToast(`Pago de ${fuente} registrado.`, 'success');
-        document.getElementById('reg-notas').value = '';
-        cargarPagosMesActual();
-      }
-    }
-
-    async function eliminarPago(id, reloadId) {
-      if (!confirm('¿Eliminar este pago?')) return;
-      const error = await pagosDB.eliminar(id);
-      if (error) { showToast('Error al eliminar.', 'error'); return; }
-      showToast('Pago eliminado.', 'success');
-      if (reloadId === 'pagos-mes-actual') cargarPagosMesActual();
-      else cargarHistorial();
-    }
-
-    function switchTab(id, btn) {
-      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('tab-' + id).classList.add('active');
-      btn.classList.add('active');
-      if (id === 'historial') cargarHistorial();
-    }
-
-    function showToast(msg, type = 'success') {
-      const t = document.getElementById('toast');
-      t.textContent = msg;
-      t.className = `toast ${type} show`;
-      setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    init();
-  </script>
+  <script type="module" src="assets/js/pages/admin.js"></script>
 </body>
 </html>
