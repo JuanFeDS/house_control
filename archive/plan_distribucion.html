@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de Distribución — Hogar</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #f1f5f9;
+      color: #0f172a;
+      min-height: 100vh;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      padding: 2.5rem 1.5rem 5rem;
+      text-align: center;
+    }
+
+    .hero h1 { font-size: 1.65rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; margin-bottom: 0.35rem; }
+    .hero p  { font-size: 0.88rem; color: #94a3b8; }
+
+    .kpi-wrap {
+      max-width: 800px;
+      margin: -3rem auto 0;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.85rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .kpi { background: #fff; border-radius: 14px; padding: 1.1rem 1.25rem; box-shadow: 0 4px 20px rgba(0,0,0,.13); border-top: 3px solid transparent; }
+    .kpi.ing { border-color: #10b981; }
+    .kpi.gas { border-color: #f43f5e; }
+    .kpi.lib { border-color: #6366f1; }
+    .kpi-label  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #64748b; margin-bottom: 0.3rem; }
+    .kpi-amount { font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; }
+    .kpi.ing .kpi-amount { color: #059669; }
+    .kpi.gas .kpi-amount { color: #e11d48; }
+    .kpi.lib .kpi-amount { color: #4f46e5; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 1.75rem 1rem 3rem; }
+
+    .page-tabs { display: flex; gap: 0.5rem; background: #fff; border-radius: 14px; padding: 0.35rem; box-shadow: 0 1px 6px rgba(0,0,0,.09); margin-bottom: 1.75rem; }
+    .page-tab  { flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.7rem 1rem; border-radius: 10px; border: none; background: transparent; color: #64748b; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: all .2s; }
+    .page-tab.active { background: linear-gradient(135deg, #1e3a5f, #0f172a); color: #fff; box-shadow: 0 2px 8px rgba(15,23,42,.35); }
+    .page-view { display: none; }
+    .page-view.active { display: block; }
+
+    .section { background: #fff; border-radius: 14px; padding: 1.5rem; box-shadow: 0 1px 6px rgba(0,0,0,.07); margin-bottom: 1.25rem; }
+    .section-title { font-size: 0.95rem; font-weight: 700; color: #0f172a; margin-bottom: 1.1rem; padding-bottom: 0.6rem; border-bottom: 2px solid #f1f5f9; display: flex; align-items: center; gap: 0.5rem; }
+    .section-note { font-weight: 400; font-size: 0.75rem; color: #94a3b8; margin-left: auto; }
+
+    /* Calendar */
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .cal-cell { background: #f8fafc; border-radius: 10px; padding: 7px 6px; min-height: 96px; }
+    .cal-cell.active-day { background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+    .cal-cell.today { border: 2px solid #6366f1; }
+    .cal-day-num { font-size: 0.72rem; font-weight: 700; color: #cbd5e1; margin-bottom: 5px; }
+    .cal-cell.active-day .cal-day-num { color: #475569; }
+    .cal-cell.today .cal-day-num { display: inline-flex; align-items: center; justify-content: center; background: #6366f1; color: #fff; width: 18px; height: 18px; border-radius: 50%; font-size: 0.65rem; }
+
+    .chip { display: block; font-size: 0.6rem; font-weight: 700; padding: 2px 5px; border-radius: 4px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .chip.ingreso  { background: #d1fae5; color: #065f46; }
+    .chip.pago-ben { background: #e0e7ff; color: #3730a3; }
+    .chip.gasto    { background: #fee2e2; color: #991b1b; }
+    .chip.mascota  { background: #fef3c7; color: #92400e; }
+    .chip-sub { display: block; font-size: 0.57rem; color: #94a3b8; padding: 0 2px; margin-bottom: 1px; }
+
+    /* Distribution cards */
+    .dist-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    .dist-card { border-radius: 12px; padding: 1.1rem 1.2rem; background: #f8fafc; border: 1px solid #e2e8f0; position: relative; overflow: hidden; }
+    .dist-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #6366f1, #818cf8); }
+    .dc-fuente { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #64748b; margin-bottom: 0.3rem; }
+    .dc-dia { margin-bottom: 0.65rem; }
+    .dc-total { font-size: 1.3rem; font-weight: 800; color: #0f172a; letter-spacing: -0.02em; margin-bottom: 0.65rem; }
+    .dc-row { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; padding: 0.22rem 0; border-bottom: 1px dashed #e2e8f0; }
+    .dc-row:last-child { border-bottom: none; }
+    .dc-row strong { color: #1e293b; font-weight: 700; }
+
+    /* Accumulation bars */
+    .accum-bar { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem; }
+    .accum-label { font-size: 0.78rem; color: #64748b; width: 110px; flex-shrink: 0; }
+    .accum-track { flex: 1; background: #f1f5f9; border-radius: 99px; height: 8px; overflow: hidden; }
+    .accum-fill  { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #6366f1, #818cf8); }
+    .accum-val   { font-size: 0.78rem; font-weight: 700; color: #0f172a; width: 90px; text-align: right; flex-shrink: 0; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    thead th { text-align: left; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; padding: 0.5rem 0.8rem; border-bottom: 2px solid #f1f5f9; background: #fafafa; }
+    thead th:not(:first-child) { text-align: right; }
+    tbody td { padding: 0.6rem 0.8rem; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    tbody td:not(:first-child) { text-align: right; }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #f8fafc; }
+    .total-row td { font-weight: 700; color: #0f172a; background: #f8fafc; border-top: 2px solid #e2e8f0; }
+
+    .badge-dia { display: inline-block; background: #ede9fe; color: #5b21b6; font-size: 0.72rem; font-weight: 700; border-radius: 99px; padding: 0.1rem 0.55rem; }
+
+    /* Beneficiarios */
+    .ben-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem; }
+    .ben-group { background: #f8fafc; border-radius: 10px; padding: 1rem 1.1rem; border: 1px solid #e2e8f0; }
+    .ben-group-title { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: #64748b; margin-bottom: 0.75rem; }
+    .ben-item { display: flex; justify-content: space-between; align-items: center; padding: 0.42rem 0; border-bottom: 1px solid #e2e8f0; font-size: 0.88rem; }
+    .ben-item:last-of-type { border-bottom: none; }
+    .ben-item .name { color: #475569; }
+    .ben-item .val  { font-weight: 700; color: #0f172a; }
+    .ben-subtotal { display: flex; justify-content: space-between; margin-top: 0.65rem; padding-top: 0.45rem; border-top: 2px solid #e2e8f0; font-weight: 800; font-size: 0.88rem; color: #0f172a; }
+
+    /* Política */
+    .politica ol { padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+    .politica li { font-size: 0.88rem; color: #475569; line-height: 1.6; }
+    .politica ul { margin-top: 0.4rem; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 0.3rem; }
+
+    /* Legend */
+    .legend { display: flex; flex-wrap: wrap; gap: 0.5rem 1.2rem; margin-bottom: 1.1rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.76rem; color: #64748b; }
+
+    /* Agenda (mobile) */
+    .cal-agenda { display: none; flex-direction: column; gap: 0.5rem; }
+
+    .agenda-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.7rem 0.85rem;
+      background: #f8fafc;
+      border-radius: 10px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .agenda-item.today { border-color: #6366f1; background: #fafaff; }
+
+    .agenda-day-badge {
+      min-width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      background: #e2e8f0;
+      font-weight: 800;
+      font-size: 0.88rem;
+      color: #475569;
+      flex-shrink: 0;
+    }
+
+    .agenda-item.today .agenda-day-badge { background: #6366f1; color: #fff; }
+
+    .agenda-events { display: flex; flex-direction: column; gap: 3px; flex: 1; padding-top: 2px; }
+
+    .agenda-events .chip { font-size: 0.72rem; padding: 3px 7px; }
+    .agenda-events .chip-sub { font-size: 0.66rem; padding: 0 4px; }
+
+    @media (max-width: 640px) {
+      .kpi-wrap { grid-template-columns: 1fr; }
+      .hero { padding-bottom: 2rem; }
+      .kpi-wrap { margin-top: 1rem; }
+      .dist-cards { grid-template-columns: 1fr; }
+      .ben-grid { grid-template-columns: 1fr; }
+      #cal-grid { display: none; }
+      .cal-agenda { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="hero">
+    <h1>Distribución de Flujos del Hogar</h1>
+    <p>Plan mensual · Ingresos, gastos y beneficiarios</p>
+  </div>
+
+  <div id="kpi-wrap" class="kpi-wrap"></div>
+
+  <div class="container">
+
+    <div class="page-tabs">
+      <button class="page-tab active" onclick="switchPage('calendario', this)">📅 Calendario</button>
+      <button class="page-tab" onclick="switchPage('detalle', this)">📊 Ingresos &amp; Gastos</button>
+    </div>
+
+    <div id="page-calendario" class="page-view active">
+      <div class="section">
+        <div class="legend">
+          <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#d1fae5"></span> Ingreso</div>
+          <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#e0e7ff"></span> Beneficiarios</div>
+          <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#fee2e2"></span> Gasto</div>
+          <div class="legend-item"><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#fef3c7"></span> Mascota</div>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+        <div id="cal-agenda" class="cal-agenda"></div>
+      </div>
+      <div class="section">
+        <div class="section-title">
+          Distribución por ingreso
+          <span class="section-note">* Broaster cubre todos los gastos — distribuye el excedente</span>
+        </div>
+        <div id="dist-cards" class="dist-cards"></div>
+        <div class="section-title" style="font-size:0.82rem;margin-top:0.25rem;">Acumulado mensual por beneficiario</div>
+        <div id="accum-bars" style="display:flex;flex-direction:column;gap:0.55rem;margin-top:0.5rem;"></div>
+      </div>
+    </div>
+
+    <div id="page-detalle" class="page-view">
+      <div class="section">
+        <div class="section-title"><span>💰</span> Ingresos</div>
+        <div id="table-ingresos"></div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span>🔧</span> Gastos — Servicios</div>
+        <div id="table-servicios"></div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span>📋</span> Gastos — Otros</div>
+        <div id="table-otros"></div>
+      </div>
+      <div class="section">
+        <div class="section-title"><span>🤝</span> Distribución a Beneficiarios</div>
+        <div id="beneficiarios"></div>
+      </div>
+      <div class="section politica">
+        <div class="section-title"><span>📜</span> Política de Distribución</div>
+        <div id="politica"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+  // ─────────────────────────────────────────────────────────────
+  // DATOS — idéntico a datos.json. Editar aquí o en el .json y pegar.
+  // ─────────────────────────────────────────────────────────────
+  const DATA = {
+    ingresos: [
+      { fuente: 'María',    valor: 860000,   dia_pago: 2,  distribuye_beneficiarios: true  },
+      { fuente: 'César',    valor: 2406000,  dia_pago: 5,  distribuye_beneficiarios: true  },
+      { fuente: 'Bodega',   valor: 700000,   dia_pago: 7,  distribuye_beneficiarios: false,
+        nota: 'Cubre gastos intermedios días 7–16' },
+      { fuente: 'Broaster', valor: 6600000,  dia_pago: 17, distribuye_beneficiarios: true,
+        cubre_gastos_primero: true, nota: 'Cubre todos los gastos; distribuye el excedente' }
+    ],
+    gastos_servicios: [
+      { concepto: 'EPS',     valor: 440000,  dia_pago: 15 },
+      { concepto: 'Claro',   valor: 151000,  dia_pago: 20 },
+      { concepto: 'Gas',     valor: 150000,  dia_pago: 20 },
+      { concepto: 'Luz',     valor: 1000000, dia_pago: 25 },
+      { concepto: 'Agua',    valor: 325000,  dia_pago: 25 },
+      { concepto: 'Codensa', valor: 15000,   dia_pago: 25 },
+      { concepto: 'ETB',     valor: 70000,   dia_pago: 28 }
+    ],
+    gastos_otros: [
+      { concepto: 'Deuda',    valor_mensual: 3000000 },
+      { concepto: 'Impuesto', valor_mensual: 800000  },
+      { concepto: 'Subsidio', valor_mensual: 60000   },
+      { concepto: 'Puppie',   valor_mensual: 320000, frecuencia: 'cada_3_dias', valor_por_pago: 32000, primer_dia: 3 },
+      { concepto: 'Gatos',    valor_mensual: 75000,  frecuencia: 'cada_3_dias', valor_por_pago: 7500,  primer_dia: 3 }
+    ],
+    beneficiarios: [
+      { nombre: 'Persona 1', tipo: 'completa' },
+      { nombre: 'Persona 2', tipo: 'completa' },
+      { nombre: 'Persona 3', tipo: 'completa' },
+      { nombre: 'Persona 4', tipo: 'completa' },
+      { nombre: 'Persona 5', tipo: 'media'    },
+      { nombre: 'Persona 6', tipo: 'media'    }
+    ]
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // CÓMPUTOS DERIVADOS
+  // ─────────────────────────────────────────────────────────────
+  const fmt = n => '$' + Math.round(n).toLocaleString('es-CO');
+
+  const totalSvc   = DATA.gastos_servicios.reduce((s, g) => s + g.valor, 0);
+  const totalOtros = DATA.gastos_otros.reduce((s, g) => s + (g.valor_mensual || 0), 0);
+  const totalGastos = totalSvc + totalOtros;
+
+  const ingresosDist   = DATA.ingresos.filter(i => i.distribuye_beneficiarios !== false);
+  const totalIngresos  = ingresosDist.reduce((s, i) => s + i.valor, 0);
+  const disponible     = totalIngresos - totalGastos;
+
+  const completaCount = DATA.beneficiarios.filter(b => b.tipo === 'completa').length;
+  const mediaCount    = DATA.beneficiarios.filter(b => b.tipo === 'media').length;
+  const unidades      = completaCount + mediaCount * 0.5;
+  const valorCompleta = Math.round(disponible / unidades);
+  const valorMedia    = Math.round(valorCompleta / 2);
+
+  const mascotas        = DATA.gastos_otros.filter(g => g.frecuencia === 'cada_3_dias');
+  const mascotasPorPago = mascotas.reduce((s, m) => s + m.valor_por_pago, 0);
+
+  // Distribución por ingreso (con reserva de efectivo)
+  const distribPorIngreso = (() => {
+    let acum = 0;
+    return DATA.ingresos
+      .filter(i => i.distribuye_beneficiarios)
+      .map(i => {
+        const monto = i.cubre_gastos_primero
+          ? disponible - acum
+          : i.valor - mascotasPorPago;
+        acum += monto;
+        return {
+          fuente:     i.fuente,
+          dia:        i.dia_pago,
+          esBroaster: !!i.cubre_gastos_primero,
+          monto,
+          porCompleta: Math.round(monto / unidades),
+          porMedia:    Math.round(monto / unidades / 2)
+        };
+      });
+  })();
+
+  // Eventos del calendario por día
+  const calEvents = (() => {
+    const ev = {};
+    const add = (day, obj) => { (ev[day] = ev[day] || []).push(obj); };
+
+    DATA.ingresos.forEach(i => {
+      add(i.dia_pago, { tipo: 'ingreso', label: `↑ ${i.fuente}` });
+    });
+
+    distribPorIngreso.forEach(d => {
+      const sub = `×${completaCount} ${fmt(d.porCompleta)}  ·  ×${mediaCount} ${fmt(d.porMedia)}`;
+      add(d.dia, { tipo: 'pago-ben', label: `→ Ben. ${fmt(d.monto)}`, sub });
+    });
+
+    DATA.gastos_servicios.forEach(g => {
+      add(g.dia_pago, { tipo: 'gasto', label: `↓ ${g.concepto}` });
+    });
+
+    mascotas.forEach(m => {
+      for (let d = m.primer_dia; d <= 31; d += 3)
+        add(d, { tipo: 'mascota', label: `🐾 ${m.concepto}` });
+    });
+
+    return ev;
+  })();
+
+  // ─────────────────────────────────────────────────────────────
+  // RENDER
+  // ─────────────────────────────────────────────────────────────
+  const TODAY = 3; // día actual del mes
+
+  function renderKPIs() {
+    document.getElementById('kpi-wrap').innerHTML = `
+      <div class="kpi ing">
+        <div class="kpi-label">Total Ingresos</div>
+        <div class="kpi-amount">${fmt(totalBrutoIngresos)}</div>
+      </div>
+      <div class="kpi gas">
+        <div class="kpi-label">Total Gastos</div>
+        <div class="kpi-amount">${fmt(totalGastos)}</div>
+      </div>
+      <div class="kpi lib">
+        <div class="kpi-label">Para Beneficiarios</div>
+        <div class="kpi-amount">${fmt(disponible)}</div>
+      </div>`;
+  }
+
+  function renderCalendar() {
+    let gridHtml = '';
+    let agendaHtml = '';
+
+    for (let d = 1; d <= 31; d++) {
+      const evs     = calEvents[d] || [];
+      const active  = evs.length > 0;
+      const isToday = d === TODAY;
+
+      const chipsHTML = evs.map(e => {
+        let out = `<span class="chip ${e.tipo}">${e.label}</span>`;
+        if (e.sub) out += `<span class="chip-sub">${e.sub}</span>`;
+        return out;
+      }).join('');
+
+      // Grid cell (desktop)
+      const cls = ['cal-cell', active ? 'active-day' : '', isToday ? 'today' : ''].filter(Boolean).join(' ');
+      gridHtml += `<div class="${cls}"><div class="cal-day-num">${d}</div>${chipsHTML}</div>`;
+
+      // Agenda row (mobile) — solo días con eventos
+      if (active) {
+        const itemCls = isToday ? 'agenda-item today' : 'agenda-item';
+        agendaHtml += `
+          <div class="${itemCls}">
+            <div class="agenda-day-badge">${d}</div>
+            <div class="agenda-events">${chipsHTML}</div>
+          </div>`;
+      }
+    }
+
+    document.getElementById('cal-grid').innerHTML   = gridHtml;
+    document.getElementById('cal-agenda').innerHTML = agendaHtml;
+  }
+
+  function renderDistCards() {
+    const cards = distribPorIngreso.map(d => `
+      <div class="dist-card">
+        <div class="dc-fuente">${d.fuente}${d.esBroaster ? ' *' : ''}</div>
+        <div class="dc-dia"><span class="badge-dia">Día ${d.dia}</span></div>
+        <div class="dc-total">${fmt(d.monto)}</div>
+        <div class="dc-row"><span>Completa ×${completaCount}</span><strong>${fmt(d.porCompleta)}</strong></div>
+        <div class="dc-row"><span>Media ×${mediaCount}</span><strong>${fmt(d.porMedia)}</strong></div>
+      </div>`).join('');
+    document.getElementById('dist-cards').innerHTML = cards;
+  }
+
+  function renderAccum() {
+    let acumCompleta = 0;
+    const bars = distribPorIngreso.map(d => {
+      acumCompleta += d.porCompleta;
+      const pct = (acumCompleta / valorCompleta * 100).toFixed(1);
+      return `
+        <div class="accum-bar">
+          <div class="accum-label">Al día ${d.dia}</div>
+          <div class="accum-track"><div class="accum-fill" style="width:${pct}%"></div></div>
+          <div class="accum-val">${fmt(acumCompleta)}</div>
+        </div>`;
+    }).join('');
+    document.getElementById('accum-bars').innerHTML = bars;
+  }
+
+  function tableHTML(headers, rows, totalRow) {
+    const ths = headers.map((h, i) => `<th${i > 0 ? ' style="text-align:right"' : ''}>${h}</th>`).join('');
+    const trs = rows.map(r =>
+      `<tr>${r.map((c, i) => `<td${i > 0 ? ' style="text-align:right"' : ''}>${c}</td>`).join('')}</tr>`
+    ).join('');
+    const tot = totalRow
+      ? `<tr class="total-row">${totalRow.map((c, i) => `<td${i > 0 ? ' style="text-align:right"' : ''}>${c}</td>`).join('')}</tr>`
+      : '';
+    return `<table><thead><tr>${ths}</tr></thead><tbody>${trs}${tot}</tbody></table>`;
+  }
+
+  function renderTableIngresos() {
+    const rows = DATA.ingresos.map(i => [
+      i.fuente,
+      fmt(i.valor),
+      `<span class="badge-dia">${i.dia_pago}</span>`
+    ]);
+    const total = DATA.ingresos.reduce((s, i) => s + i.valor, 0);
+    document.getElementById('table-ingresos').innerHTML =
+      tableHTML(['Fuente', 'Valor', 'Día de pago'], rows, ['Total Ingresos', fmt(total), '']);
+  }
+
+  function renderTableServicios() {
+    const rows = DATA.gastos_servicios.map(g => [
+      g.concepto,
+      fmt(g.valor),
+      `<span class="badge-dia">${g.dia_pago}</span>`
+    ]);
+    document.getElementById('table-servicios').innerHTML =
+      tableHTML(['Concepto', 'Valor', 'Día de pago'], rows, ['Total Servicios', fmt(totalSvc), '']);
+  }
+
+  function renderTableOtros() {
+    const rows = DATA.gastos_otros.map(g => [g.concepto, fmt(g.valor_mensual)]);
+    document.getElementById('table-otros').innerHTML =
+      tableHTML(['Concepto', 'Valor'], rows, ['Total Otros Gastos', fmt(totalOtros)]);
+  }
+
+  function renderBeneficiarios() {
+    const completas = DATA.beneficiarios.filter(b => b.tipo === 'completa');
+    const medias    = DATA.beneficiarios.filter(b => b.tipo === 'media');
+
+    const groupHTML = (title, list, valor) => `
+      <div class="ben-group">
+        <div class="ben-group-title">${title}</div>
+        ${list.map(b => `<div class="ben-item"><span class="name">${b.nombre}</span><span class="val">${fmt(valor)}</span></div>`).join('')}
+        <div class="ben-subtotal"><span>Subtotal</span><span>${fmt(valor * list.length)}</span></div>
+      </div>`;
+
+    const resumen = tableHTML(
+      ['Concepto', 'Valor'],
+      [
+        ['Participaciones completas', fmt(valorCompleta * completaCount)],
+        ['Medias participaciones',    fmt(valorMedia    * mediaCount)]
+      ],
+      ['Total Distribuido', fmt(disponible)]
+    );
+
+    document.getElementById('beneficiarios').innerHTML = `
+      <div class="ben-grid">
+        ${groupHTML('Participación completa', completas, valorCompleta)}
+        ${groupHTML('Media participación',    medias,    valorMedia)}
+      </div>
+      ${resumen}`;
+  }
+
+  function renderPolitica() {
+    const bodega = DATA.ingresos.find(i => !i.distribuye_beneficiarios);
+    const diasDist = distribPorIngreso.map(d => `día ${d.dia} (${d.fuente})`).join(', ');
+    document.getElementById('politica').innerHTML = `
+      <ol>
+        <li>Todos los gastos del hogar tienen prioridad sobre la distribución.</li>
+        <li>Una vez cubiertos los gastos mensuales, el excedente disponible corresponde a <strong>${fmt(disponible)}</strong>.</li>
+        <li>El pago a beneficiarios se realiza <strong>el mismo día de cada ingreso</strong>,
+            descontando los gastos inmediatos del día siguiente: ${diasDist}.</li>
+        <li>La distribución se realiza de la siguiente forma:
+          <ul>
+            <li>${completaCount} beneficiarios reciben participación completa de <strong>${fmt(valorCompleta)}</strong>.</li>
+            <li>${mediaCount} beneficiarios reciben media participación de <strong>${fmt(valorMedia)}</strong>.</li>
+          </ul>
+        </li>
+        <li>${bodega.fuente} (${fmt(bodega.valor)}) cubre los gastos intermedios entre los días ${bodega.dia_pago} y 16.</li>
+        <li>El total distribuido corresponde exactamente al excedente mensual disponible.</li>
+      </ol>`;
+  }
+
+  function switchPage(view, btn) {
+    document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.page-tab').forEach(b => b.classList.remove('active'));
+    document.getElementById('page-' + view).classList.add('active');
+    btn.classList.add('active');
+  }
+
+  // ── Init ──────────────────────────────────────────
+  renderKPIs();
+  renderCalendar();
+  renderDistCards();
+  renderAccum();
+  renderTableIngresos();
+  renderTableServicios();
+  renderTableOtros();
+  renderBeneficiarios();
+  renderPolitica();
+  </script>
+
+</body>
+</html>
