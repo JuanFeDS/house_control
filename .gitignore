@@ -17,5 +17,6 @@ desktop.ini
 # Logs
 *.log
 
-# Dependencias (si se agrega npm en el futuro)
+# Dependencias
 node_modules/
+dist/
