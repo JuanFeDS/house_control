@@ -1,0 +1,67 @@
+{
+  "ingresos": [
+    {
+      "fuente": "María",
+      "valor": 860000,
+      "dia_pago": 2,
+      "distribuye_beneficiarios": true
+    },
+    {
+      "fuente": "César",
+      "valor": 2406000,
+      "dia_pago": 5,
+      "distribuye_beneficiarios": true
+    },
+    {
+      "fuente": "Bodega",
+      "valor": 700000,
+      "dia_pago": 7,
+      "distribuye_beneficiarios": false,
+      "nota": "Cubre gastos intermedios días 7–16"
+    },
+    {
+      "fuente": "Broaster",
+      "valor": 6600000,
+      "dia_pago": 17,
+      "distribuye_beneficiarios": true,
+      "cubre_gastos_primero": true,
+      "nota": "Cubre todos los gastos del mes; distribuye solo el excedente"
+    }
+  ],
+  "gastos_servicios": [
+    { "concepto": "EPS",     "valor": 440000,  "dia_pago": 15 },
+    { "concepto": "Claro",   "valor": 151000,  "dia_pago": 20 },
+    { "concepto": "Gas",     "valor": 150000,  "dia_pago": 20 },
+    { "concepto": "Luz",     "valor": 1000000, "dia_pago": 25 },
+    { "concepto": "Agua",    "valor": 325000,  "dia_pago": 25 },
+    { "concepto": "Codensa", "valor": 15000,   "dia_pago": 25 },
+    { "concepto": "ETB",     "valor": 70000,   "dia_pago": 28 }
+  ],
+  "gastos_otros": [
+    { "concepto": "Deuda",     "valor_mensual": 3000000 },
+    { "concepto": "Impuesto",  "valor_mensual": 800000  },
+    { "concepto": "Subsidio",  "valor_mensual": 60000   },
+    {
+      "concepto": "Puppie",
+      "valor_mensual": 320000,
+      "frecuencia": "cada_3_dias",
+      "valor_por_pago": 32000,
+      "primer_dia": 3
+    },
+    {
+      "concepto": "Gatos",
+      "valor_mensual": 75000,
+      "frecuencia": "cada_3_dias",
+      "valor_por_pago": 7500,
+      "primer_dia": 3
+    }
+  ],
+  "beneficiarios": [
+    { "nombre": "Persona 1", "tipo": "completa" },
+    { "nombre": "Persona 2", "tipo": "completa" },
+    { "nombre": "Persona 3", "tipo": "completa" },
+    { "nombre": "Persona 4", "tipo": "completa" },
+    { "nombre": "Persona 5", "tipo": "media"    },
+    { "nombre": "Persona 6", "tipo": "media"    }
+  ]
+}
