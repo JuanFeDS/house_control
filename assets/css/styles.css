@@ -1,0 +1,309 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+/* ─── Tokens ─────────────────────────────────────────────── */
+:root {
+  --brand:        #C8102E;
+  --brand-light:  #FFF0F2;
+  --brand-mid:    #F9C0C8;
+
+  --bg:           #F5F5F5;
+  --surface:      #FFFFFF;
+  --surface-2:    #F9F9F9;
+
+  --border:       #E5E5E5;
+  --border-2:     #D0D0D0;
+
+  --text-1:       #111111;
+  --text-2:       #4A4A4A;
+  --text-3:       #909090;
+
+  --income:       #166534;
+  --income-bg:    #DCFCE7;
+  --expense:      #7F1D1D;
+  --expense-bg:   #FEE2E2;
+  --distrib:      #1E3A8A;
+  --distrib-bg:   #DBEAFE;
+  --pet:          #92400E;
+  --pet-bg:       #FEF3C7;
+
+  --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  --r-sm: 4px;
+  --r:    8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+}
+
+/* ─── Reset ──────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-1);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+/* ─── Chips (calendario) ─────────────────────────────────── */
+.chip {
+  display: block;
+  font-size: 0.58rem;
+  font-weight: 700;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: .01em;
+}
+.chip.ingreso  { background: var(--income-bg);  color: var(--income);  }
+.chip.pago-ben { background: var(--distrib-bg); color: var(--distrib); }
+.chip.gasto    { background: var(--expense-bg); color: var(--expense); }
+.chip.mascota  { background: var(--pet-bg);     color: var(--pet);     }
+.chip-sub { display: block; font-size: 0.53rem; color: var(--text-3); padding: 0 3px; margin-bottom: 2px; }
+
+/* ─── Secciones ──────────────────────────────────────────── */
+.section {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 1.35rem 1.5rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--text-1);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.section-note {
+  margin-left: auto;
+  font-weight: 500;
+  font-size: 0.7rem;
+  color: var(--text-3);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* ─── Tabs ───────────────────────────────────────────────── */
+.tabs-wrap {
+  display: flex;
+  gap: 3px;
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 4px;
+  border: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.tab-btn {
+  flex: 1;
+  padding: 0.58rem 0.75rem;
+  border: none;
+  border-radius: var(--r);
+  background: transparent;
+  color: var(--text-3);
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background .12s, color .12s;
+}
+
+.tab-btn:hover:not(.active) { background: var(--surface-2); color: var(--text-2); }
+
+.tab-btn.active {
+  background: var(--text-1);
+  color: #fff;
+}
+
+.tab-view { display: none; }
+.tab-view.active { display: block; }
+
+/* ─── Botones ────────────────────────────────────────────── */
+.btn-primary {
+  padding: 0.65rem 1.4rem;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--r);
+  font-family: var(--font);
+  font-size: 0.875rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity .12s;
+  letter-spacing: .01em;
+}
+.btn-primary:hover:not(:disabled) { opacity: 0.87; }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn-ghost {
+  background: rgba(255,255,255,.09);
+  color: #ccc;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: var(--r-sm);
+  padding: 0.38rem 0.85rem;
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .12s;
+}
+.btn-ghost:hover { background: rgba(255,255,255,.15); color: #fff; }
+
+/* ─── Badge día ──────────────────────────────────────────── */
+.badge-dia {
+  display: inline-block;
+  background: var(--brand-light);
+  color: var(--brand);
+  font-size: 0.68rem;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 0.1rem 0.55rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .02em;
+}
+
+/* ─── Tablas ─────────────────────────────────────────────── */
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+
+thead th {
+  text-align: left;
+  font-weight: 700;
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-3);
+  padding: 0.45rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+thead th:not(:first-child) { text-align: right; }
+
+tbody td {
+  padding: 0.58rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-2);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+tbody td:first-child { color: var(--text-1); font-weight: 500; }
+tbody td:not(:first-child) { text-align: right; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--surface-2); }
+
+.total-row td {
+  font-weight: 800 !important;
+  color: var(--text-1) !important;
+  background: var(--surface-2);
+  border-top: 1px solid var(--border-2);
+}
+
+/* ─── Toast ──────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--text-1); color: #fff;
+  padding: 0.7rem 1.1rem; border-radius: var(--r);
+  font-family: var(--font); font-size: 0.83rem; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,.22);
+  transform: translateY(10px); opacity: 0;
+  transition: all .2s ease; pointer-events: none; z-index: 200;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success::before { content: '✓'; color: #4ade80; font-weight: 800; }
+.toast.error::before   { content: '✕'; color: var(--brand); font-weight: 800; }
+
+/* ─── Legenda calendario ─────────────────────────────────── */
+.legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; margin-bottom: 1rem; }
+.legend-item { display: flex; align-items: center; gap: 0.38rem; font-size: 0.73rem; color: var(--text-2); font-weight: 500; }
+
+/* ─── KPIs ───────────────────────────────────────────────── */
+.kpi-wrap {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  padding: 1.25rem 1.25rem 0;
+}
+
+.kpi {
+  background: var(--surface);
+  border-radius: var(--r-lg);
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid transparent;
+}
+
+.kpi.ing  { border-top-color: var(--income); }
+.kpi.gas  { border-top-color: var(--expense); }
+.kpi.lib  { border-top-color: var(--brand); }
+
+.kpi-label  { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); margin-bottom: 0.3rem; }
+.kpi-amount { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.kpi.ing .kpi-amount { color: var(--income); }
+.kpi.gas .kpi-amount { color: var(--expense); }
+.kpi.lib .kpi-amount { color: var(--brand); }
+
+/* ─── Calendario ─────────────────────────────────────────── */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+
+.cal-cell {
+  background: var(--bg);
+  border-radius: var(--r-sm);
+  padding: 6px 5px;
+  min-height: 88px;
+}
+
+.cal-cell.active-day {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.cal-cell.today {
+  border: 2px solid var(--brand);
+}
+
+.cal-day-num {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-3);
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.cal-cell.active-day .cal-day-num { color: var(--text-2); }
+
+.cal-cell.today .cal-day-num {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--brand); color: #fff;
+  width: 17px; height: 17px; border-radius: 50%; font-size: 0.62rem;
+}
+
+/* Agenda (mobile) */
+.cal-agenda { display: none; flex-direction: column; gap: 0.45rem; }
+.agenda-item { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.65rem 0.8rem; background: var(--surface); border-radius: var(--r); border: 1px solid var(--border); }
+.agenda-item.today { border-color: var(--brand); }
+.agenda-day-badge { min-width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; border-radius: var(--r-sm); background: var(--surface-2); border: 1px solid var(--border); font-weight: 800; font-size: 0.85rem; color: var(--text-2); flex-shrink: 0; font-variant-numeric: tabular-nums; }
+.agenda-item.today .agenda-day-badge { background: var(--brand); color: #fff; border-color: var(--brand); }
+.agenda-events { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.agenda-events .chip { font-size: 0.68rem; padding: 3px 7px; }
+
+/* ─── Reducción de movimiento ────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

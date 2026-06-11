@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Distribución del Hogar</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    body { background: var(--bg); }
+
+    /* ── Header ── */
+    .page-header {
+      background: var(--text-1);
+      padding: 0 1.25rem;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--brand);
+    }
+    .page-header-inner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 0;
+    }
+    .page-header-icon { font-size: 1.1rem; line-height: 1; }
+    .page-header-title { font-size: 1rem; font-weight: 800; color: #fff; }
+    .page-header-sub   { font-size: 0.72rem; color: #666; margin-top: 2px; font-weight: 500; }
+    .page-header-actions { display: flex; align-items: center; }
+
+    /* ── Container ── */
+    .container { padding: 1.25rem; }
+
+    /* ── Tabs en contenedor (con margen) ── */
+    .tabs-outer { padding: 1.25rem 1.25rem 0; }
+
+    /* ── Formulario ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-3);
+    }
+
+    .form-input, .form-select, .form-textarea {
+      padding: 0.6rem 0.75rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-size: 0.88rem;
+      font-family: var(--font);
+      color: var(--text-1);
+      background: var(--surface);
+      outline: none;
+      transition: border-color .12s;
+    }
+    .form-input:focus,
+    .form-select:focus,
+    .form-textarea:focus { border-color: var(--brand); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+
+    /* ── Preview de montos ── */
+    .montos-preview {
+      background: var(--brand-light);
+      border: 1px solid var(--brand-mid);
+      border-radius: var(--r);
+      padding: 0.9rem 1rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.75rem;
+    }
+    .mp-item .mp-label {
+      font-size: 0.65rem; color: var(--brand); font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em; margin-bottom: 0.2rem;
+    }
+    .mp-item .mp-val {
+      font-size: 1.05rem; font-weight: 800; color: var(--text-1);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Historial ── */
+    .mes-filter { display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+    .mes-filter label { font-size: 0.75rem; font-weight: 700; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; }
+    .mes-filter select {
+      padding: 0.42rem 0.7rem;
+      border: 1.5px solid var(--border);
+      border-radius: var(--r);
+      font-size: 0.84rem;
+      font-family: var(--font);
+      outline: none;
+      color: var(--text-1);
+    }
+    .mes-filter select:focus { border-color: var(--brand); }
+
+    .btn-del {
+      background: none; border: none;
+      color: var(--expense); cursor: pointer;
+      font-size: 0.78rem; font-weight: 700;
+      padding: 2px 7px; border-radius: var(--r-sm);
+      font-family: var(--font);
+    }
+    .btn-del:hover { background: var(--expense-bg); }
+
+    .badge-fuente {
+      display: inline-block;
+      background: var(--brand-light);
+      color: var(--brand);
+      font-size: 0.7rem; font-weight: 700;
+      border-radius: 99px; padding: 0.1rem 0.6rem;
+    }
+
+    .empty-state { text-align: center; padding: 2rem; color: var(--text-3); font-size: 0.86rem; }
+
+    @media (max-width: 600px) {
+      .kpi-wrap  { grid-template-columns: 1fr; }
+      .form-grid { grid-template-columns: 1fr; }
+      .montos-preview { grid-template-columns: 1fr; }
+      #cal-grid   { display: none; }
+      .cal-agenda { display: flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="page-header">
+    <div class="page-header-inner">
+      <span class="page-header-icon">🏠</span>
+      <div>
+        <div class="page-header-title">Panel de Administración</div>
+        <div class="page-header-sub" id="admin-nombre">Cargando…</div>
+      </div>
+    </div>
+    <div class="page-header-actions">
+      <button class="btn-ghost" onclick="identity.clear()">Cambiar persona</button>
+    </div>
+  </div>
+
+  <div class="kpi-wrap">
+    <div class="kpi ing">
+      <div class="kpi-label">Total Ingresos</div>
+      <div class="kpi-amount" id="kpi-ing"></div>
+    </div>
+    <div class="kpi gas">
+      <div class="kpi-label">Total Gastos</div>
+      <div class="kpi-amount" id="kpi-gas"></div>
+    </div>
+    <div class="kpi lib">
+      <div class="kpi-label">Para Beneficiarios</div>
+      <div class="kpi-amount" id="kpi-lib"></div>
+    </div>
+  </div>
+
+  <div class="tabs-outer">
+    <div class="tabs-wrap">
+      <button class="tab-btn active" onclick="switchTab('calendario', this)">📅 Calendario</button>
+      <button class="tab-btn" onclick="switchTab('registrar', this)">💳 Registrar Pago</button>
+      <button class="tab-btn" onclick="switchTab('historial', this)">📋 Historial</button>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <!-- TAB: CALENDARIO -->
+    <div id="tab-calendario" class="tab-view active">
+      <div class="section">
+        <div class="legend">
+          <div class="legend-item"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#d1fae5"></span> Ingreso</div>
+          <div class="legend-item"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#e0e7ff"></span> Beneficiarios</div>
+          <div class="legend-item"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#fee2e2"></span> Gasto</div>
+          <div class="legend-item"><span style="display:inline-block;width:9px;height:9px;border-radius:2px;background:#fef3c7"></span> Mascota</div>
+        </div>
+        <div id="cal-grid" class="cal-grid"></div>
+        <div id="cal-agenda" class="cal-agenda"></div>
+      </div>
+    </div>
+
+    <!-- TAB: REGISTRAR PAGO -->
+    <div id="tab-registrar" class="tab-view">
+      <div class="section">
+        <div class="section-title">Registrar pago a beneficiarios</div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Fuente de ingreso</label>
+            <select id="reg-fuente" class="form-select" onchange="actualizarMontos()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Fecha de pago</label>
+            <input type="date" id="reg-fecha" class="form-input" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Mes</label>
+            <select id="reg-mes" class="form-select"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Año</label>
+            <select id="reg-anio" class="form-select"></select>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Montos (calculados automáticamente)</label>
+            <div class="montos-preview">
+              <div class="mp-item">
+                <div class="mp-label">Total distribuido</div>
+                <div class="mp-val" id="mp-total">—</div>
+              </div>
+              <div class="mp-item">
+                <div class="mp-label">Completa (×<span id="mp-nc">4</span>)</div>
+                <div class="mp-val" id="mp-completa">—</div>
+              </div>
+              <div class="mp-item">
+                <div class="mp-label">Media (×<span id="mp-nm">2</span>)</div>
+                <div class="mp-val" id="mp-media">—</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group full">
+            <label class="form-label">Notas (opcional)</label>
+            <textarea id="reg-notas" class="form-textarea" placeholder="Ej: Transferencia realizada, referencia #12345"></textarea>
+          </div>
+        </div>
+        <div style="margin-top:1.25rem">
+          <button class="btn-primary" id="btn-registrar" onclick="registrarPago()">Confirmar pago</button>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-title">Pagos del mes actual</div>
+        <div id="pagos-mes-actual"></div>
+      </div>
+    </div>
+
+    <!-- TAB: HISTORIAL -->
+    <div id="tab-historial" class="tab-view">
+      <div class="section">
+        <div class="section-title">Historial de pagos</div>
+        <div class="mes-filter">
+          <label>Mes:</label>
+          <select id="hist-mes"></select>
+          <label>Año:</label>
+          <select id="hist-anio"></select>
+          <button class="btn-primary" style="padding:0.45rem 0.9rem;font-size:0.82rem" onclick="cargarHistorial()">Ver</button>
+        </div>
+        <div id="historial-tabla"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    let todayDay;
+
+    async function init() {
+      const user = identity.require('admin');
+      if (!user) return;
+
+      document.getElementById('admin-nombre').textContent = user.nombre;
+      document.getElementById('kpi-ing').textContent = fmt(totalBrutoIngresos);
+      document.getElementById('kpi-gas').textContent = fmt(totalGastos);
+      document.getElementById('kpi-lib').textContent = fmt(disponible);
+      document.getElementById('mp-nc').textContent = completaCount;
+      document.getElementById('mp-nm').textContent = mediaCount;
+
+      // Calendario
+      const now = new Date();
+      todayDay = now.getDate();
+      const { gridHtml, agendaHtml } = buildCalendarHTML(todayDay);
+      document.getElementById('cal-grid').innerHTML   = gridHtml;
+      document.getElementById('cal-agenda').innerHTML = agendaHtml;
+
+      // Fuentes en el formulario
+      const sel = document.getElementById('reg-fuente');
+      distribPorIngreso.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.fuente;
+        opt.textContent = `${d.fuente} — Día ${d.dia}`;
+        sel.appendChild(opt);
+      });
+      actualizarMontos();
+
+      // Fecha default: hoy
+      document.getElementById('reg-fecha').value = now.toISOString().split('T')[0];
+
+      // Selectores mes/año
+      const mesSelIds  = ['reg-mes', 'hist-mes'];
+      const anioSelIds = ['reg-anio', 'hist-anio'];
+      MESES.forEach((m, i) => {
+        mesSelIds.forEach(id => {
+          const o = document.createElement('option');
+          o.value = i + 1; o.textContent = m;
+          if (i + 1 === now.getMonth() + 1) o.selected = true;
+          document.getElementById(id).appendChild(o.cloneNode(true));
+        });
+      });
+      const anios = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1];
+      anios.forEach(a => {
+        anioSelIds.forEach(id => {
+          const o = document.createElement('option');
+          o.value = a; o.textContent = a;
+          if (a === now.getFullYear()) o.selected = true;
+          document.getElementById(id).appendChild(o.cloneNode(true));
+        });
+      });
+
+      cargarPagosMesActual();
+    }
+
+    function actualizarMontos() {
+      const fuente = document.getElementById('reg-fuente').value;
+      const d = distribPorIngreso.find(x => x.fuente === fuente);
+      if (!d) return;
+      document.getElementById('mp-total').textContent    = fmt(d.monto);
+      document.getElementById('mp-completa').textContent = fmt(d.porCompleta);
+      document.getElementById('mp-media').textContent    = fmt(d.porMedia);
+    }
+
+    async function cargarPagosMesActual() {
+      const now = new Date();
+      const lista = await pagosDB.getMes(now.getMonth() + 1, now.getFullYear());
+      renderTablaPagos('pagos-mes-actual', lista, true);
+    }
+
+    async function cargarHistorial() {
+      const mes  = parseInt(document.getElementById('hist-mes').value);
+      const anio = parseInt(document.getElementById('hist-anio').value);
+      const lista = await pagosDB.getMes(mes, anio);
+      renderTablaPagos('historial-tabla', lista, true);
+    }
+
+    function renderTablaPagos(containerId, lista, conEliminar) {
+      const el = document.getElementById(containerId);
+      if (!lista.length) {
+        el.innerHTML = '<div class="empty-state">No hay pagos registrados para este período.</div>';
+        return;
+      }
+      const rows = lista.map(p => `
+        <tr>
+          <td>${p.fecha}</td>
+          <td><span class="badge-fuente">${p.fuente}</span></td>
+          <td>${fmt(p.monto_total)}</td>
+          <td>${fmt(p.monto_completa)}</td>
+          <td>${fmt(p.monto_media)}</td>
+          <td>${p.notas || '—'}</td>
+          ${conEliminar ? `<td><button class="btn-del" onclick="eliminarPago('${p.id}', '${containerId}')">✕</button></td>` : ''}
+        </tr>`).join('');
+      el.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Fecha</th><th>Fuente</th><th>Total</th>
+              <th>Completa</th><th>Media</th><th>Notas</th>
+              ${conEliminar ? '<th></th>' : ''}
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+    }
+
+    async function registrarPago() {
+      const btn    = document.getElementById('btn-registrar');
+      const fuente = document.getElementById('reg-fuente').value;
+      const d      = distribPorIngreso.find(x => x.fuente === fuente);
+      const mes    = parseInt(document.getElementById('reg-mes').value);
+      const anio   = parseInt(document.getElementById('reg-anio').value);
+      const fecha  = document.getElementById('reg-fecha').value;
+      const notas  = document.getElementById('reg-notas').value.trim();
+
+      if (!fecha) { showToast('Selecciona una fecha.', 'error'); return; }
+
+      btn.disabled = true;
+      const error = await pagosDB.crear({
+        fecha, fuente,
+        monto_total:    d.monto,
+        monto_completa: d.porCompleta,
+        monto_media:    d.porMedia,
+        mes, anio, notas: notas || null
+      });
+
+      btn.disabled = false;
+      if (error) {
+        showToast('Error al registrar el pago.', 'error');
+      } else {
+        showToast(`Pago de ${fuente} registrado.`, 'success');
+        document.getElementById('reg-notas').value = '';
+        cargarPagosMesActual();
+      }
+    }
+
+    async function eliminarPago(id, reloadId) {
+      if (!confirm('¿Eliminar este pago?')) return;
+      const error = await pagosDB.eliminar(id);
+      if (error) { showToast('Error al eliminar.', 'error'); return; }
+      showToast('Pago eliminado.', 'success');
+      if (reloadId === 'pagos-mes-actual') cargarPagosMesActual();
+      else cargarHistorial();
+    }
+
+    function switchTab(id, btn) {
+      document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      btn.classList.add('active');
+      if (id === 'historial') cargarHistorial();
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Distribución del Hogar</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+  <style>
+    body {
+      background: #fff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Franja roja de sello — la firma visual de este proyecto */
+    .brand-stripe {
+      height: 6px;
+      background: var(--brand);
+      flex-shrink: 0;
+    }
+
+    .page-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2.5rem 1.25rem 3rem;
+    }
+
+    /* Encabezado */
+    .brand-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .brand-icon {
+      font-size: 2.25rem;
+      display: block;
+      margin-bottom: 0.6rem;
+      line-height: 1;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-1);
+      letter-spacing: -0.025em;
+      margin-bottom: 0.25rem;
+    }
+
+    .brand-sub {
+      font-size: 0.82rem;
+      color: var(--text-3);
+      font-weight: 500;
+    }
+
+    /* Contenedor principal */
+    .picker-wrap {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .picker-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--text-3);
+      margin-bottom: 0.85rem;
+    }
+
+    /* Grid de nombres */
+    .personas-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Tarjeta de persona — borde perforado como talón de comprobante */
+    .persona-btn {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 0.9rem 1.1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--r) var(--r) 0 0;
+      cursor: pointer;
+      transition: border-color .12s, box-shadow .12s;
+      font-family: var(--font);
+      text-align: left;
+    }
+
+    /* El talón perforado */
+    .persona-btn::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 6px;
+      background: repeating-linear-gradient(
+        90deg,
+        #fff 0px, #fff 5px,
+        var(--border) 5px, var(--border) 6px,
+        #fff 6px, #fff 10px
+      );
+    }
+
+    .persona-btn:hover {
+      border-color: var(--brand);
+      box-shadow: 0 0 0 1px var(--brand);
+    }
+
+    .persona-btn:hover .persona-avatar {
+      transform: scale(1.06);
+    }
+
+    .persona-avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: #fff;
+      flex-shrink: 0;
+      transition: transform .12s;
+    }
+
+    .persona-info { flex: 1; min-width: 0; }
+
+    .persona-nombre {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .persona-tipo {
+      font-size: 0.66rem;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-top: 1px;
+    }
+
+    /* Separador punteado */
+    .divider-dashed {
+      border: none;
+      border-top: 2px dashed var(--border);
+      margin: 0.85rem 0;
+    }
+
+    /* Botón admin */
+    .admin-btn {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 0.9rem;
+      background: var(--text-1);
+      border: none;
+      border-radius: var(--r);
+      cursor: pointer;
+      font-family: var(--font);
+      transition: opacity .12s;
+    }
+
+    .admin-btn:hover { opacity: 0.85; }
+
+    .admin-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: var(--r-sm);
+      background: rgba(255,255,255,.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .admin-nombre { font-size: 0.88rem; font-weight: 700; color: #fff; }
+    .admin-rol    { font-size: 0.66rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: .06em; margin-top: 1px; }
+
+    /* Nota de pie */
+    .footer-note {
+      margin-top: 1.5rem;
+      font-size: 0.72rem;
+      color: var(--text-3);
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+    }
+
+    .footer-note::before,
+    .footer-note::after {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 400px) {
+      .personas-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="brand-stripe"></div>
+
+  <div class="page-body">
+
+    <div class="brand-header">
+      <span class="brand-icon">🏠</span>
+      <div class="brand-title">Distribución del Hogar</div>
+      <div class="brand-sub">Selecciona tu nombre para continuar</div>
+    </div>
+
+    <div class="picker-wrap">
+      <div class="picker-label">Beneficiarios</div>
+      <div id="personas-grid" class="personas-grid"></div>
+
+      <hr class="divider-dashed" />
+
+      <div id="admin-btn-wrap"></div>
+
+      <div class="footer-note">Tu sesión se recuerda en este dispositivo</div>
+    </div>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/js/app.js"></script>
+  <script>
+    // Si ya hay identidad guardada, redirigir directo
+    const saved = identity.get();
+    if (saved) {
+      window.location.href = saved.rol === 'admin' ? 'admin.html' : 'beneficiario.html';
+    }
+
+    const COLORES = ['#C8102E','#166534','#1E3A8A','#92400E','#5B21B6','#0E7490','#9D174D','#065F46'];
+
+    function iniciales(nombre) {
+      return nombre.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function seleccionar(persona) {
+      identity.set(persona);
+      window.location.href = persona.rol === 'admin' ? 'admin.html' : 'beneficiario.html';
+    }
+
+    // Beneficiarios
+    const beneficiarios = PERSONAS.filter(p => p.rol === 'beneficiario');
+    const grid = document.getElementById('personas-grid');
+
+    beneficiarios.forEach((p, i) => {
+      const color    = COLORES[i % COLORES.length];
+      const tipoLabel = p.tipo_participacion === 'completa' ? 'Completa' : 'Media';
+
+      const btn = document.createElement('button');
+      btn.className = 'persona-btn';
+      btn.innerHTML = `
+        <div class="persona-avatar" style="background:${color}">${iniciales(p.nombre)}</div>
+        <div class="persona-info">
+          <div class="persona-nombre">${p.nombre}</div>
+          <div class="persona-tipo">${tipoLabel}</div>
+        </div>`;
+      btn.onclick = () => seleccionar(p);
+      grid.appendChild(btn);
+    });
+
+    // Admin
+    const admin = PERSONAS.find(p => p.rol === 'admin');
+    document.getElementById('admin-btn-wrap').innerHTML = `
+      <button class="admin-btn" id="admin-click">
+        <div class="admin-icon">⚙️</div>
+        <div>
+          <div class="admin-nombre">${admin.nombre}</div>
+          <div class="admin-rol">Administrador</div>
+        </div>
+      </button>`;
+    document.getElementById('admin-click').onclick = () => seleccionar(admin);
+  </script>
+</body>
+</html>
