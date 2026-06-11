@@ -1,0 +1,21 @@
+# Entorno
+.env
+.env.local
+.env*.local
+
+# Editor
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+
+# Dependencias (si se agrega npm en el futuro)
+node_modules/
