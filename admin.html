@@ -4,13 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin — Distribución del Hogar</title>
+  <script>var _t=localStorage.getItem('hogar_theme');if(_t)document.documentElement.dataset.theme=_t;</script>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <style>
     body { background: var(--bg); }
 
     /* ── Header ── */
     .page-header {
-      background: var(--text-1);
+      background: var(--header-bg);
       padding: 0 1.25rem;
       display: flex;
       align-items: stretch;
@@ -25,7 +26,7 @@
     }
     .page-header-icon { font-size: 1.1rem; line-height: 1; }
     .page-header-title { font-size: 1rem; font-weight: 800; color: #fff; }
-    .page-header-sub   { font-size: 0.72rem; color: #666; margin-top: 2px; font-weight: 500; }
+    .page-header-sub   { font-size: 0.72rem; color: var(--header-sub); margin-top: 2px; font-weight: 500; }
     .page-header-actions { display: flex; align-items: center; }
 
     /* ── Container ── */
@@ -33,6 +34,9 @@
 
     /* ── Tabs en contenedor (con margen) ── */
     .tabs-outer { padding: 1.25rem 1.25rem 0; }
+
+    /* ── Monospace en amounts del formulario ── */
+    .mp-item .mp-val { font-family: var(--font-mono); }
 
     /* ── Formulario ── */
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
@@ -134,7 +138,8 @@
         <div class="page-header-sub" id="admin-nombre">Cargando…</div>
       </div>
     </div>
-    <div class="page-header-actions">
+    <div class="page-header-actions" style="display:flex;gap:0.5rem;align-items:center">
+      <button class="btn-ghost" id="theme-btn" onclick="toggleTheme()" style="padding:0.38rem 0.6rem">☾</button>
       <button class="btn-ghost" onclick="identity.clear()">Cambiar persona</button>
     </div>
   </div>

@@ -1,16 +1,17 @@
 import {
   identity, ingresosDB, fmt,
   totalBrutoIngresos, totalGastos, disponible,
-  completaCount, mediaCount,
+  completaCount, parcialCount,
   buildCalendarHTML, ventanas,
   MESES, mesAnioLabel
 } from '../app.js';
 
-window.identity         = identity;
-window.switchTab        = switchTab;
+window.identity           = identity;
+window.switchTab          = switchTab;
 window.actualizarDesglose = actualizarDesglose;
-window.registrarIngreso = registrarIngreso;
-window.eliminarIngreso  = eliminarIngreso;
+window.registrarIngreso   = registrarIngreso;
+window.eliminarIngreso    = eliminarIngreso;
+window.toggleTheme        = toggleTheme;
 
 async function init() {
   const user = identity.require('admin');
@@ -122,14 +123,10 @@ function actualizarDesglose() {
     html += `
       <div class="desglose-dist">
         <div class="desglose-dist-title">Distribución a beneficiarios</div>
-        <div class="desglose-dist-grid">
+        <div class="desglose-dist-grid" style="grid-template-columns:1fr 1fr 1fr">
           <div class="desglose-dist-item">
-            <div class="label">Aporte al fondo</div>
+            <div class="label">De este ingreso</div>
             <div class="val">${fmt(ventana.aporteAlFondo)}</div>
-          </div>
-          <div class="desglose-dist-item">
-            <div class="label">Fondo total del mes</div>
-            <div class="val">${fmt(disponible)}</div>
           </div>
           <div class="desglose-dist-item">
             <div class="label">Completa (×${completaCount})</div>
@@ -137,8 +134,8 @@ function actualizarDesglose() {
             <div class="sub">por persona</div>
           </div>
           <div class="desglose-dist-item">
-            <div class="label">Media (×${mediaCount})</div>
-            <div class="val">${fmt(ventana.porMedia)}</div>
+            <div class="label">Parcial (×${parcialCount})</div>
+            <div class="val">${fmt(ventana.porParcial)}</div>
             <div class="sub">por persona</div>
           </div>
         </div>
@@ -182,7 +179,7 @@ async function registrarIngreso() {
     distribuye:   ventana.distribuye,
     aporte_fondo: ventana.aporteAlFondo,
     valor_completa: ventana.porCompleta,
-    valor_media:    ventana.porMedia,
+    valor_parcial:  ventana.porParcial,
   };
 
   btn.disabled = true;
@@ -257,4 +254,19 @@ function showToast(msg, type = 'success') {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
+function isDark() {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function toggleTheme() {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('hogar_theme', next);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = next === 'dark' ? '☀' : '☾';
+}
+
 init();
+const _themeBtn = document.getElementById('theme-btn');
+if (_themeBtn) _themeBtn.textContent = isDark() ? '☀' : '☾';

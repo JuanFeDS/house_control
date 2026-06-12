@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Distribución del Hogar</title>
+  <script>var _t=localStorage.getItem('hogar_theme');if(_t)document.documentElement.dataset.theme=_t;</script>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <style>
     body {
-      background: #fff;
+      background: var(--bg);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -43,17 +44,18 @@
     }
 
     .brand-title {
-      font-size: 1.4rem;
-      font-weight: 800;
+      font-size: 1.5rem;
+      font-weight: 700;
       color: var(--text-1);
-      letter-spacing: -0.025em;
-      margin-bottom: 0.25rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.3rem;
     }
 
     .brand-sub {
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       color: var(--text-3);
       font-weight: 500;
+      letter-spacing: .01em;
     }
 
     /* Contenedor principal */
@@ -85,15 +87,16 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      padding: 0.85rem 0.9rem 1.1rem;
+      padding: 0.9rem 0.9rem 1.1rem;
       background: var(--surface);
       border: 1px solid var(--border);
       border-bottom: none;
       border-radius: var(--r) var(--r) 0 0;
       cursor: pointer;
-      transition: border-color .12s, box-shadow .12s;
+      transition: border-color .15s, box-shadow .15s, transform .15s;
       font-family: var(--font);
       text-align: left;
+      box-shadow: var(--shadow-sm);
     }
 
     /* El talón perforado */
@@ -104,19 +107,20 @@
       height: 6px;
       background: repeating-linear-gradient(
         90deg,
-        #fff 0px, #fff 5px,
+        var(--surface) 0px, var(--surface) 5px,
         var(--border) 5px, var(--border) 6px,
-        #fff 6px, #fff 10px
+        var(--surface) 6px, var(--surface) 10px
       );
     }
 
     .persona-btn:hover {
       border-color: var(--brand);
-      box-shadow: 0 0 0 1px var(--brand);
+      box-shadow: 0 0 0 1.5px var(--brand), var(--shadow);
+      transform: translateY(-2px);
     }
 
     .persona-btn:hover .persona-avatar {
-      transform: scale(1.06);
+      transform: scale(1.08);
     }
 
     .persona-avatar {
@@ -145,12 +149,12 @@
     }
 
     .persona-tipo {
-      font-size: 0.66rem;
+      font-size: 0.62rem;
       font-weight: 600;
-      color: var(--text-3);
+      color: var(--brand);
       text-transform: uppercase;
-      letter-spacing: .06em;
-      margin-top: 1px;
+      letter-spacing: .09em;
+      margin-top: 2px;
     }
 
     /* Separador punteado */
@@ -167,7 +171,7 @@
       align-items: center;
       gap: 0.75rem;
       padding: 0.75rem 0.9rem;
-      background: var(--text-1);
+      background: var(--header-bg);
       border: none;
       border-radius: var(--r);
       cursor: pointer;
@@ -212,6 +216,17 @@
       background: var(--border);
     }
 
+    .btn-theme-index {
+      position: fixed; top: 1rem; right: 1rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 99px; padding: 0.35rem 0.8rem;
+      font-size: 0.82rem; cursor: pointer;
+      box-shadow: var(--shadow-sm); font-family: var(--font);
+      color: var(--text-2); z-index: 10;
+      transition: box-shadow .15s;
+    }
+    .btn-theme-index:hover { box-shadow: var(--shadow); color: var(--text-1); }
+
     @media (max-width: 400px) {
       .personas-grid { grid-template-columns: 1fr; }
     }
@@ -219,6 +234,7 @@
 </head>
 <body>
 
+  <button class="btn-theme-index" id="theme-btn" onclick="toggleTheme()">☾</button>
   <div class="brand-stripe"></div>
 
   <div class="page-body">

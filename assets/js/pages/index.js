@@ -1,5 +1,21 @@
 import { identity, PERSONAS } from '../app.js';
 
+function isDark() {
+  const t = document.documentElement.dataset.theme;
+  return t ? t === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+window.toggleTheme = function() {
+  const next = isDark() ? 'light' : 'dark';
+  document.documentElement.dataset.theme = next;
+  localStorage.setItem('hogar_theme', next);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = next === 'dark' ? '☀' : '☾';
+};
+
+const _tb = document.getElementById('theme-btn');
+if (_tb) _tb.textContent = isDark() ? '☀' : '☾';
+
 const COLORES = ['#C8102E','#166534','#1E3A8A','#92400E','#5B21B6','#0E7490','#9D174D','#065F46'];
 
 const saved = identity.get();
@@ -21,7 +37,7 @@ const grid = document.getElementById('personas-grid');
 
 beneficiarios.forEach((p, i) => {
   const color     = COLORES[i % COLORES.length];
-  const tipoLabel = p.tipo_participacion === 'completa' ? 'Completa' : 'Media';
+  const tipoLabel = p.tipo_participacion === 'completa' ? 'Completa' : 'Parcial';
 
   const btn = document.createElement('button');
   btn.className = 'persona-btn';

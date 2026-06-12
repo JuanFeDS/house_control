@@ -4,86 +4,110 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Estado — Distribución del Hogar</title>
+  <script>var _t=localStorage.getItem('hogar_theme');if(_t)document.documentElement.dataset.theme=_t;</script>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <style>
     body { background: var(--bg); }
 
     /* ── Header ── */
     .page-header {
-      background: var(--text-1);
-      padding: 1rem 1.25rem 3rem;
+      background: var(--header-bg);
+      padding: 1.1rem 1.25rem 3.5rem;
       border-bottom: 3px solid var(--brand);
     }
     .header-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .greeting h1 { font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; }
-    .greeting p  { font-size: 0.75rem; color: #666; margin-top: 3px; font-weight: 500; }
+    .greeting h1 { font-size: 1.15rem; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
+    .greeting p  { font-size: 0.72rem; color: var(--header-sub); margin-top: 4px; font-weight: 500; font-family: var(--font-mono); letter-spacing: .02em; }
 
     /* ── Hero card flotante ── */
-    .hero-card-wrap { padding: 0 1.25rem; margin-top: -2rem; margin-bottom: 1.25rem; }
+    .hero-card-wrap { padding: 0 1.25rem; margin-top: -2.5rem; margin-bottom: 1.25rem; }
     .hero-card {
       background: var(--surface);
       border-radius: var(--r-xl);
-      padding: 1.25rem 1.5rem;
-      border: 1px solid var(--border);
-      box-shadow: 0 4px 20px rgba(0,0,0,.1);
+      padding: 1.4rem 1.6rem 1.25rem;
+      box-shadow: var(--shadow);
     }
-    .hc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.9rem; }
+    .hc-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.1rem; }
     .hc-tipo {
       display: inline-flex; align-items: center;
       background: var(--brand-light); color: var(--brand);
-      font-size: 0.68rem; font-weight: 800;
-      text-transform: uppercase; letter-spacing: .08em;
-      border-radius: 99px; padding: 0.22rem 0.7rem;
+      font-size: 0.62rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      border-radius: 4px; padding: 0.22rem 0.65rem;
     }
-    .hc-mes { font-size: 0.75rem; color: var(--text-3); font-weight: 600; }
-    .hc-amount-label { font-size: 0.67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); margin-bottom: 0.2rem; }
-    .hc-amount { font-size: 2.1rem; font-weight: 800; color: var(--text-1); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+    .hc-mes {
+      font-size: 0.72rem; color: var(--text-3); font-weight: 500;
+      font-family: var(--font-mono);
+    }
+    .hc-amount-label {
+      font-size: 0.62rem; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-3); margin-bottom: 0.15rem;
+    }
+    .hc-amount {
+      font-size: 3rem; font-weight: 700;
+      color: var(--text-1); letter-spacing: -0.04em;
+      font-family: var(--font-mono);
+      line-height: 1;
+    }
 
     /* ── Progress ── */
-    .progress-wrap { margin-top: 1rem; }
-    .progress-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-3); margin-bottom: 0.35rem; font-weight: 500; }
-    .progress-labels strong { color: var(--text-1); font-weight: 800; }
-    .progress-track { background: var(--bg); border-radius: 99px; height: 7px; overflow: hidden; border: 1px solid var(--border); }
-    .progress-fill  { height: 100%; border-radius: 99px; background: var(--brand); transition: width .5s ease; }
+    .progress-wrap { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .progress-labels {
+      display: flex; justify-content: space-between;
+      font-size: 0.68rem; color: var(--text-3);
+      margin-bottom: 0.5rem; font-weight: 500;
+    }
+    .progress-labels strong { color: var(--text-1); font-weight: 700; font-family: var(--font-mono); }
+    .progress-track {
+      background: var(--bg); border-radius: 99px;
+      height: 6px; overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 99px;
+      background: var(--brand);
+      transition: width .6s cubic-bezier(.4,0,.2,1);
+    }
 
     /* ── Tabs ── */
-    .tabs-outer { padding: 0 1.25rem 1.25rem; }
+    .tabs-outer { padding: 0 1.25rem; }
 
     /* ── Content ── */
-    .container { padding: 0 1.25rem 2rem; }
+    .container { padding: 0 1.25rem 2.5rem; }
 
     /* ── Eventos de pago ── */
     .pago-evento {
-      display: flex; align-items: center; gap: 0.85rem;
-      padding: 0.8rem 0;
+      display: flex; align-items: center; gap: 0.9rem;
+      padding: 0.85rem 0;
       border-bottom: 1px solid var(--border);
     }
     .pago-evento:last-child { border-bottom: none; }
 
     .pe-status {
-      width: 32px; height: 32px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 0.85rem; flex-shrink: 0; font-weight: 800;
+      font-size: 0.82rem; flex-shrink: 0; font-weight: 700;
     }
     .pe-status.paid    { background: var(--income-bg); color: var(--income); }
     .pe-status.pending { background: var(--surface-2); color: var(--text-3); border: 1.5px dashed var(--border-2); }
 
     .pe-info { flex: 1; }
     .pe-fuente  { font-size: 0.88rem; font-weight: 700; color: var(--text-1); }
-    .pe-detalle { font-size: 0.72rem; color: var(--text-3); margin-top: 2px; }
+    .pe-detalle { font-size: 0.7rem; color: var(--text-3); margin-top: 3px; }
 
     .pe-monto { text-align: right; }
-    .pe-monto .amount { font-size: 1rem; font-weight: 800; color: var(--text-1); font-variant-numeric: tabular-nums; }
-    .pe-monto .status-label { font-size: 0.63rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; margin-top: 2px; }
+    .pe-monto .amount {
+      font-size: 1rem; font-weight: 700;
+      color: var(--text-1);
+      font-family: var(--font-mono);
+    }
+    .pe-monto .status-label {
+      font-size: 0.6rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em; margin-top: 3px;
+    }
     .pe-monto .status-label.paid    { color: var(--income); }
     .pe-monto .status-label.pending { color: var(--text-3); }
 
-    /* ── Resumen KPIs ── */
-    .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
-
-    @media (max-width: 480px) {
-      .kpi-grid { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
@@ -94,7 +118,10 @@
         <h1 id="greeting-name">Hola 👋</h1>
         <p id="greeting-mes">—</p>
       </div>
-      <button class="btn-ghost" onclick="identity.clear()">Cambiar</button>
+      <div style="display:flex;gap:0.5rem">
+        <button class="btn-ghost" id="theme-btn" onclick="toggleTheme()" style="padding:0.38rem 0.6rem">☾</button>
+        <button class="btn-ghost" onclick="identity.clear()">Cambiar</button>
+      </div>
     </div>
   </div>
 
@@ -137,19 +164,15 @@
 
     <!-- TAB: RESUMEN DEL HOGAR -->
     <div id="tab-hogar" class="tab-view">
-      <div class="kpi-grid">
-        <div class="kpi ing">
-          <div class="kpi-label">Total Ingresos</div>
-          <div class="kpi-amount" id="kpi-ing">—</div>
-        </div>
-        <div class="kpi gas">
-          <div class="kpi-label">Total Gastos</div>
-          <div class="kpi-amount" id="kpi-gas">—</div>
-        </div>
-        <div class="kpi lib">
-          <div class="kpi-label">Para Beneficiarios</div>
-          <div class="kpi-amount" id="kpi-lib">—</div>
-        </div>
+
+      <div class="section">
+        <div class="section-title">Resumen del mes</div>
+        <table>
+          <thead>
+            <tr><th>Concepto</th><th>Total hogar</th><th>Tu parte</th></tr>
+          </thead>
+          <tbody id="tbody-resumen"></tbody>
+        </table>
       </div>
 
       <div class="section">
@@ -177,11 +200,8 @@
       </div>
 
       <div class="section">
-        <div class="section-title">Distribución mensual</div>
-        <table>
-          <thead><tr><th>Fuente</th><th>Día</th><th>Total</th><th>Completa</th><th>Media</th></tr></thead>
-          <tbody id="tbody-distribucion"></tbody>
-        </table>
+        <div class="section-title">Pagos del mes</div>
+        <div id="distribucion-eventos">Cargando…</div>
       </div>
     </div>
 
