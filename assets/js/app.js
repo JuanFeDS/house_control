@@ -1,10 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
 // ─── Supabase ─────────────────────────────────────────────────
-const sb = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+const _url = import.meta.env.VITE_SUPABASE_URL;
+const _key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const sb   = (_url && _key) ? createClient(_url, _key) : null;
 
 // ─── Datos ────────────────────────────────────────────────────
 export const DATA = {
@@ -183,11 +182,13 @@ export const identity = {
 // ─── Ingresos registrados ─────────────────────────────────────
 export const ingresosDB = {
   async getMes(mes, anio) {
+    if (!sb) return [];
     const { data } = await sb.from('ingresos_registrados').select('*')
       .eq('mes', mes).eq('anio', anio).order('fecha');
     return data || [];
   },
   async crear(ingreso) {
+    if (!sb) return new Error('Supabase no configurado');
     const user = identity.get();
     const { error } = await sb.from('ingresos_registrados').insert({
       ...ingreso,
@@ -196,6 +197,7 @@ export const ingresosDB = {
     return error;
   },
   async eliminar(id) {
+    if (!sb) return new Error('Supabase no configurado');
     const { error } = await sb.from('ingresos_registrados').delete().eq('id', id);
     return error;
   }
