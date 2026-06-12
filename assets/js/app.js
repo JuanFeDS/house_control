@@ -34,8 +34,8 @@ export const DATA = {
     { concepto: 'Gatos',    valor_mensual: 75000,  frecuencia: 'cada_3_dias', valor_por_pago: 7500,  primer_dia: 3 }
   ],
   beneficiarios: [
-    { nombre: 'Completa', tipo: 'completa' },
-    { nombre: 'Media',    tipo: 'media'    }
+    { nombre: 'Completa', tipo: 'completa', cantidad: 4 },
+    { nombre: 'Parcial',  tipo: 'parcial',  cantidad: 2 }
   ]
 };
 
@@ -55,16 +55,16 @@ export const totalBrutoIngresos = DATA.ingresos.reduce((s, i) => s + i.valor, 0)
 export const totalSvc           = DATA.gastos_servicios.reduce((s, g) => s + g.valor, 0);
 export const totalOtros         = DATA.gastos_otros.reduce((s, g) => s + (g.valor_mensual || 0), 0);
 export const totalGastos        = totalSvc + totalOtros;
-const totalIngresosDist         = DATA.ingresos
+export const totalIngresosDist  = DATA.ingresos
                                     .filter(i => i.distribuye_beneficiarios !== false)
                                     .reduce((s, i) => s + i.valor, 0);
 export const disponible         = totalIngresosDist - totalGastos;
 
-export const completaCount = DATA.beneficiarios.filter(b => b.tipo === 'completa').length;
-export const mediaCount    = DATA.beneficiarios.filter(b => b.tipo === 'media').length;
-const unidades             = completaCount + mediaCount * 0.5;
+export const completaCount = DATA.beneficiarios.find(b => b.tipo === 'completa')?.cantidad ?? 1;
+export const parcialCount  = DATA.beneficiarios.find(b => b.tipo === 'parcial')?.cantidad ?? 1;
+const unidades             = completaCount + parcialCount * 0.5;
 export const valorCompleta = Math.round(disponible / unidades);
-export const valorMedia    = Math.round(valorCompleta / 2);
+export const valorParcial  = Math.round(valorCompleta / 2);
 
 const mascotas        = DATA.gastos_otros.filter(g => g.frecuencia === 'cada_3_dias');
 const mascotasPorPago = mascotas.reduce((s, m) => s + m.valor_por_pago, 0);
@@ -85,7 +85,7 @@ export const distribPorIngreso = (() => {
         esBroaster:  !!i.cubre_gastos_primero,
         monto,
         porCompleta: Math.round(monto / unidades),
-        porMedia:    Math.round(monto / unidades / 2)
+        porParcial:    Math.round(monto / unidades / 2)
       };
     });
 })();
@@ -130,7 +130,7 @@ export const ventanas = (() => {
       gastosFijos:       ingreso.cubre_gastos_primero ? gastosFijos : [],
       aporteAlFondo:     dist?.monto ?? 0,
       porCompleta:       dist?.porCompleta ?? 0,
-      porMedia:          dist?.porMedia ?? 0,
+      porParcial:          dist?.porParcial ?? 0,
     };
   });
 })();
@@ -140,7 +140,7 @@ export const calEvents = (() => {
   const add = (day, obj) => { (ev[day] = ev[day] || []).push(obj); };
   DATA.ingresos.forEach(i => add(i.dia_pago, { tipo: 'ingreso', label: `↑ ${i.fuente}` }));
   distribPorIngreso.forEach(d => {
-    const sub = `×${completaCount} ${fmt(d.porCompleta)}  ·  ×${mediaCount} ${fmt(d.porMedia)}`;
+    const sub = `×${completaCount} ${fmt(d.porCompleta)}  ·  ×${parcialCount} ${fmt(d.porParcial)}`;
     add(d.dia, { tipo: 'pago-ben', label: `→ Ben. ${fmt(d.monto)}`, sub });
   });
   DATA.gastos_servicios.forEach(g =>
