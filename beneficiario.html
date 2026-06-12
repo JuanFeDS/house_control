@@ -114,14 +114,9 @@
 
   <div class="page-header">
     <div class="header-top">
-      <div class="greeting">
-        <h1 id="greeting-name">Hola 👋</h1>
-        <p id="greeting-mes">—</p>
-      </div>
-      <div style="display:flex;gap:0.5rem">
-        <button class="btn-ghost" id="theme-btn" onclick="toggleTheme()" style="padding:0.38rem 0.6rem">☾</button>
-        <button class="btn-ghost" onclick="identity.clear()">Cambiar</button>
-      </div>
+      <button class="btn-ghost" onclick="identity.clear()" style="padding:0.38rem 0.6rem" title="Inicio">🏠</button>
+      <p id="greeting-mes" style="margin:0;font-size:0.82rem;color:var(--text-3);font-weight:600">—</p>
+      <button class="btn-ghost" id="theme-btn" onclick="toggleTheme()" style="padding:0.38rem 0.6rem">☾</button>
     </div>
   </div>
 

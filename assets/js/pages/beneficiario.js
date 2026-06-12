@@ -35,7 +35,6 @@ async function init() {
   const mes  = now.getMonth() + 1;
   const anio = now.getFullYear();
 
-  document.getElementById('greeting-name').textContent = `Hola, ${userProfile.nombre} 👋`;
   document.getElementById('greeting-mes').textContent  = mesAnioLabel(mes, anio);
   document.getElementById('hc-mes').textContent        = mesAnioLabel(mes, anio);
 
