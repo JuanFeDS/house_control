@@ -2,7 +2,7 @@ import {
   identity, ingresosDB, fmt,
   DATA, ventanas,
   valorCompleta, valorParcial,
-  totalIngresosDist, totalGastos, disponible, totalSvc, totalOtros,
+  totalBrutoIngresos, totalIngresosDist, totalGastos, disponible, totalSvc, totalOtros,
   mesAnioLabel
 } from '../app.js';
 
@@ -109,11 +109,11 @@ function renderResumen() {
 
   document.getElementById('tbody-ingresos').innerHTML = DATA.ingresos.map(i => `
     <tr>
-      <td>${i.fuente}</td>
+      <td>${i.fuente}${i.distribuye_beneficiarios === false ? ' <span class="badge-nodist">no distribuye</span>' : ''}</td>
       <td>${fmt(i.valor)}</td>
       <td><span class="badge-dia">${i.dia_pago}</span></td>
     </tr>`).join('') +
-    `<tr class="total-row"><td>Total</td><td>${fmt(totalIngresosDist)}</td><td></td></tr>`;
+    `<tr class="total-row"><td>Total bruto</td><td>${fmt(totalBrutoIngresos)}</td><td></td></tr>`;
 
   document.getElementById('tbody-servicios').innerHTML = DATA.gastos_servicios.map(g => `
     <tr>
